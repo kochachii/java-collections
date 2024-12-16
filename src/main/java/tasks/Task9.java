@@ -27,7 +27,8 @@ public class Task9 {
   // Костыль, эластик всегда выдает в топе "фальшивую персону".
   // Конвертируем начиная со второй
 
-  // Замена на скип позволяет избегать изменение списка, которое может привести к неожиданному поведению
+  // Замена на скип позволяет избегать изменение списка, которое может привести к неожиданному поведению,
+  // в частности, к нарушению идемпотентности при повторном вызове
   public List<String> getNames(List<Person> persons) {
     return persons.stream()
         .skip(1)
@@ -49,8 +50,7 @@ public class Task9 {
   public String convertPersonToString(Person person) {
     return Stream.of(person.secondName(), person.firstName(), person.middleName())
         .filter(Objects::nonNull)
-        .collect(Collectors.joining(" "))
-        .trim();
+        .collect(Collectors.joining(" "));
   }
 
   // словарь id персоны -> ее имя
@@ -67,7 +67,9 @@ public class Task9 {
 
   // есть ли совпадающие в двух коллекциях персоны?
 
-  // Улучшение времени до O(N)
+  // Улучшение времени до O(N + M), если не использовать преобразование в HashSet,
+  // время будет зависеть от реализации Collection. И если на вход попадет TreeSet, то, в целом ок,
+  // но в случае, например, с ArrayList время может ухудшиться до O(N * M)
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
     Set<Person> uniquePersons1 = new HashSet<>(persons1);
     return persons2.stream()
@@ -76,7 +78,9 @@ public class Task9 {
 
   // Посчитать число четных чисел
 
-  // Преобразование в стрим помогает создать "нераздельный логически блок", не таскать переменную
+  // Преобразование в стрим помогает создать "нераздельный логически блок", не таскать переменную,
+  // в частности, мы создаем "контекст" только в пределах которого нам нужен каунт,
+  // а также чуть-чуть улучшаем потокобезопасность
   public long countEven(Stream<Integer> numbers) {
     return numbers
         .filter(i -> i % 2 == 0)
@@ -90,7 +94,8 @@ public class Task9 {
   // hashCode = Integer.hashCode(number), а также hashCode == number (1)
   // bucketIndex = hashCode % (set.capacity - 1) (2)
   // set.loadFactor = 0.75f (3)
-  // Из (1), (2) и (3): что при "последовательном" добавлении n элементов, set.capacity будет больше,
+  // Из (1), (2) и (3): что при "последовательном" (т.е. при монотонном росте с шагом 1)
+  // добавлении n элементов, set.capacity будет больше,
   // чем последний и по совместительству наибольший элемент => значит hashCode() для любого элемента
   // выдаст уникальный bucketIndex, притом "возрастающий" порядок сохранится
   void listVsSet() {

@@ -31,8 +31,7 @@ public class Task1 {
     Map<Integer, Person> personById = personService.findPersons(personIds).stream()
         .collect(Collectors.toMap(
             Person::id,
-            Function.identity(),
-            (existing, current) -> existing
+            Function.identity()
         ));
     return personIds.stream()
         .map(personById::get)

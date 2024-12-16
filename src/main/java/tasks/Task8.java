@@ -35,10 +35,9 @@ public class Task8 {
             Collectors.toSet()
         ));
     return persons.stream()
-        .map(person -> {
-          Set<Resume> personResumes = resumesByPersonId.computeIfAbsent(person.id(), k -> Collections.emptySet());
-          return new PersonWithResumes(person, personResumes);
-        })
+        .map(person ->
+            new PersonWithResumes(person, resumesByPersonId.getOrDefault(person.id(), Collections.emptySet()))
+        )
         .collect(Collectors.toSet());
   }
 }
